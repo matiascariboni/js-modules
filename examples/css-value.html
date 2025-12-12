@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>getCssValue - CSS Inspector Example</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .css-input {
+            width: 100%;
+            min-height: 300px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .css-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .property-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .property-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .property-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item.not-found {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .result-property {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .result-value.number {
+            color: #28a745;
+        }
+
+        .result-value.string {
+            color: #fd7e14;
+        }
+
+        .result-value.null {
+            color: #dc3545;
+            font-style: italic;
+        }
+
+        .result-type {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            padding: 8px 16px;
+            background: #e9ecef;
+            color: #495057;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #dee2e6;
+        }
+
+        .sample-box {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .sample-box h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .quick-properties {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quick-property {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 13px;
+        }
+
+        .quick-property:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .info-box h4 {
+            margin-bottom: 8px;
+            color: #1976d2;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            padding: 4px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .info-box li:before {
+            content: "• ";
+            color: #2196f3;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 CSS Inspector</h1>
+            <p class="subtitle">Powered by getCssValue - Extract and parse CSS properties</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <h2>📝 CSS Input</h2>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="layout">Layout Styles</button>
+                    <button class="preset-btn" data-preset="colors">Color Styles</button>
+                    <button class="preset-btn" data-preset="typography">Typography</button>
+                    <button class="preset-btn" data-preset="mixed">Mixed Values</button>
+                </div>
+
+                <textarea class="css-input" id="css-input" placeholder="Enter CSS here...
+Example:
+width: 300px;
+height: 200px;
+background-color: #ff0000;
+opacity: 0.8;"></textarea>
+
+                <div class="info-box">
+                    <h4>How it works:</h4>
+                    <ul>
+                        <li>Numeric values are automatically converted to numbers</li>
+                        <li>String values are returned as-is</li>
+                        <li>Non-existent properties return null</li>
+                        <li>Case-insensitive property matching</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🔎 Property Inspector</h2>
+                
+                <div class="property-input">
+                    <input type="text" id="property-input" placeholder="Enter property name (e.g., width, color)">
+                    <button id="inspect-btn">Inspect</button>
+                </div>
+
+                <div class="quick-properties">
+                    <div class="quick-property" data-prop="width">width</div>
+                    <div class="quick-property" data-prop="height">height</div>
+                    <div class="quick-property" data-prop="opacity">opacity</div>
+                    <div class="quick-property" data-prop="padding">padding</div>
+                    <div class="quick-property" data-prop="margin">margin</div>
+                    <div class="quick-property" data-prop="color">color</div>
+                    <div class="quick-property" data-prop="background">background</div>
+                    <div class="quick-property" data-prop="font-size">font-size</div>
+                </div>
+
+                <div class="results" id="results"></div>
+            </div>
+        </div>
+
+        <div class="sample-box" id="sample-box">
+            <h3>📦 Sample Styled Element</h3>
+            <p>Click "Extract All Styles" below to analyze this element's computed styles</p>
+            <button id="extract-styles-btn" style="background: white; color: #667eea; margin-top: 16px;">
+                Extract All Styles
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getCssValue } from '../getCssValue/index.js'
+
+        const cssInput = document.getElementById('css-input')
+        const propertyInput = document.getElementById('property-input')
+        const inspectBtn = document.getElementById('inspect-btn')
+        const resultsDiv = document.getElementById('results')
+        const quickProperties = document.querySelectorAll('.quick-property')
+        const presetBtns = document.querySelectorAll('.preset-btn')
+        const extractStylesBtn = document.getElementById('extract-styles-btn')
+        const sampleBox = document.getElementById('sample-box')
+
+        const presets = {
+            layout: `width: 300px;
+height: 200px;
+padding: 20px;
+margin: 10px;
+border-radius: 8px;
+max-width: 1200px;
+min-height: 100px;`,
+            colors: `color: #333333;
+background-color: #ffffff;
+border-color: #e0e0e0;
+background: linear-gradient(to right, #667eea, #764ba2);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);`,
+            typography: `font-size: 16px;
+font-weight: 600;
+line-height: 1.5;
+letter-spacing: 0.5px;
+text-align: center;
+font-family: Arial, sans-serif;`,
+            mixed: `width: 100%;
+height: 50vh;
+opacity: 0.95;
+z-index: 100;
+display: flex;
+flex-direction: row;
+gap: 1rem;`
+        }
+
+        const resultsHistory = []
+
+        function inspectProperty(property) {
+            const css = cssInput.value
+            if (!css.trim()) {
+                showError('Please enter some CSS first')
+                return
+            }
+
+            const value = getCssValue(css, property)
+            const type = value === null ? 'null' : typeof value
+
+            const result = {
+                property,
+                value,
+                type,
+                timestamp: new Date().toLocaleTimeString()
+            }
+
+            resultsHistory.unshift(result)
+            if (resultsHistory.length > 10) resultsHistory.pop()
+
+            displayResults()
+        }
+
+        function displayResults() {
+            if (resultsHistory.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #999; text-align: center;">No results yet. Enter a property to inspect.</p>'
+                return
+            }
+
+            resultsDiv.innerHTML = resultsHistory.map(result => {
+                const isNull = result.value === null
+                const valueClass = isNull ? 'null' : result.type
+
+                return `
+                    <div class="result-item ${isNull ? 'not-found' : ''}">
+                        <div class="result-property">${result.property}</div>
+                        <div class="result-value ${valueClass}">
+                            ${isNull ? 'null (not found)' : 
+                              result.type === 'string' ? `"${result.value}"` : 
+                              result.value}
+                        </div>
+                        <div class="result-type">
+                            Type: ${result.type} • ${result.timestamp}
+                        </div>
+                    </div>
+                `
+            }).join('')
+        }
+
+        function showError(message) {
+            resultsDiv.innerHTML = `
+                <div class="result-item not-found">
+                    <div class="result-value null">${message}</div>
+                </div>
+            `
+        }
+
+        function loadPreset(presetName) {
+            cssInput.value = presets[presetName]
+        }
+
+        function extractAllStyles() {
+            const computedStyle = window.getComputedStyle(sampleBox)
+            const cssText = computedStyle.cssText
+
+            if (!cssText) {
+                // Fallback: build CSS string from important properties
+                const properties = [
+                    'width', 'height', 'padding', 'margin', 'background',
+                    'color', 'font-size', 'border-radius', 'box-shadow'
+                ]
+                const cssLines = properties.map(prop => 
+                    `${prop}: ${computedStyle.getPropertyValue(prop)};`
+                )
+                cssInput.value = cssLines.join('\n')
+            } else {
+                cssInput.value = cssText
+            }
+
+            // Auto-inspect some interesting properties
+            setTimeout(() => {
+                inspectProperty('padding')
+            }, 100)
+            setTimeout(() => {
+                inspectProperty('border-radius')
+            }, 200)
+            setTimeout(() => {
+                inspectProperty('background')
+            }, 300)
+        }
+
+        // Event listeners
+        inspectBtn.addEventListener('click', () => {
+            const property = propertyInput.value.trim()
+            if (!property) {
+                showError('Please enter a property name')
+                return
+            }
+            inspectProperty(property)
+            propertyInput.value = ''
+        })
+
+        propertyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                inspectBtn.click()
+            }
+        })
+
+        quickProperties.forEach(btn => {
+            btn.addEventListener('click', () => {
+                inspectProperty(btn.dataset.prop)
+            })
+        })
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                loadPreset(btn.dataset.preset)
+            })
+        })
+
+        extractStylesBtn.addEventListener('click', extractAllStyles)
+
+        // Load default preset
+        loadPreset('layout')
+
+        // Auto-inspect a few properties on load
+        setTimeout(() => {
+            inspectProperty('width')
+            inspectProperty('height')
+            inspectProperty('padding')
+        }, 500)
+    </script>
+</body>
+</html>
